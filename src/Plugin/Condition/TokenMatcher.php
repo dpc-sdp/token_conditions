@@ -11,7 +11,7 @@ namespace Drupal\token_conditions\Plugin\Condition;
 
 use Drupal\Core\Condition\ConditionPluginBase;
 use Drupal\Core\Entity\ContentEntityType;
-use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -19,7 +19,6 @@ use Drupal\Core\Utility\Token;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Drupal\Core\Entity\ContentEntityInterface;
-use Drupal\Core\Entity\Entity;
 
 /**
  * Provides a 'Token Matcher' condition.
@@ -53,11 +52,11 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
   protected $token;
 
   /**
-   * The entity manager.
+   * The entity type manager.
    *
-   * @var \Drupal\Core\Entity\EntityManagerInterface
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityManager;
+  protected $entityTypeManager;
 
   /**
    * The request stack.
@@ -73,8 +72,8 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
    *   The module handler.
    * @param \Drupal\Core\Utility\Token $token
    *   Token manager service.
-   * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
-   *   The entity manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
    *   The request stack.
    * @param array $configuration
@@ -87,11 +86,11 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
    */
-  public function __construct(ModuleHandlerInterface $module_handler, Token $token, EntityManagerInterface $entity_manager, RequestStack $request_stack, array $configuration, $plugin_id, $plugin_definition) {
+  public function __construct(ModuleHandlerInterface $module_handler, Token $token, EntityTypeManagerInterface $entity_type_manager, RequestStack $request_stack, array $configuration, $plugin_id, $plugin_definition) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->moduleHandler = $module_handler;
     $this->token = $token;
-    $this->entityManager = $entity_manager;
+    $this->entityTypeManager = $entity_type_manager;
     $this->requestStack = $request_stack;
   }
 
@@ -102,7 +101,7 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
     return new static(
       $container->get('module_handler'),
       $container->get('token'),
-      $container->get('entity.manager'),
+      $container->get('entity_type.manager'),
       $container->get('request_stack'),
       $configuration,
       $plugin_id,
@@ -213,11 +212,11 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
    */
   public function defaultConfiguration() {
     return array(
-      'token_match' => '',
-      'value_match' => '',
-      'check_empty' => 0,
-      'use_regex' => 0,
-    ) + parent::defaultConfiguration();
+        'token_match' => '',
+        'value_match' => '',
+        'check_empty' => 0,
+        'use_regex' => 0,
+      ) + parent::defaultConfiguration();
   }
 
   /**
@@ -240,7 +239,7 @@ class TokenMatcher extends ConditionPluginBase implements ContainerFactoryPlugin
 
   protected function getContentTokenTypes() {
     $token_types = [];
-    $allEntities = $this->entityManager->getDefinitions();
+    $allEntities = $this->entityTypeManager->getDefinitions();
     foreach ($allEntities as $entity_type => $entity_type_info) {
       if ($entity_type_info instanceof ContentEntityType) {
         $token_types[$entity_type] = $this->getTokenType($entity_type_info);
