@@ -1,20 +1,20 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\token_conditions\Tests\TokenMatcherTest.
- */
-
 namespace Drupal\token_conditions\Tests;
 
-use Drupal\simpletest\WebTestBase;
+use Drupal\Tests\BrowserTestBase;
 
 /**
  * Tests the 'token_matcher' condition plugin.
  *
  * @group token_conditions
  */
-class TokenMatcherTest extends WebTestBase {
+class TokenMatcherTest extends BrowserTestBase {
+
+  /**
+   * The default theme.
+   */
+  protected $defaultTheme = 'classy';
 
   /**
    * An administrative user to configure the blocks.
@@ -49,6 +49,9 @@ class TokenMatcherTest extends WebTestBase {
    */
   public static $modules = ['block', 'node', 'token_conditions'];
 
+  /**
+   * {@inheritdoc}
+   */
   protected function setUp() {
     parent::setUp();
     // Get the token service.
@@ -68,7 +71,7 @@ class TokenMatcherTest extends WebTestBase {
   /**
    * Tests the token matcher plugin for node title.
    */
-  function testTokenMatcherNodeTitle() {
+  public function testTokenMatcherNodeTitle() {
     $default_theme = $this->config('system.theme')->get('default');
     $this->drupalGet('admin/structure/block/add/system_powered_by_block' . '/' . $default_theme);
     // Check for token matcher field.
